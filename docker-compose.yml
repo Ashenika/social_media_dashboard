@@ -1,0 +1,71 @@
+version: '3.8'
+services:
+  sma-app:
+    container_name: sma-app
+    build: .
+    env_file: .env
+    restart: always
+    volumes:
+      - ./:/app
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=run.py
+      - FLASK_ENV=development
+    networks:
+      - db_network
+      - web_network
+  nginx:
+    container_name: nginx
+    restart: always
+    image: "nginx:latest"
+    ports:
+      - "5085:5085"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    networks:
+      - web_network
+    depends_on: 
+      - sma-app
+
+  postgres:
+    restart: always
+    image: postgres:16.0
+    container_name: postgres
+    ports: 
+      - "5432:5332"
+    environment:
+      - DEBUG=false
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=socialdata
+    volumes:
+      - pgsql:/var/lib/postgresql/data
+    networks:
+      - web_network
+      - db_network
+
+  dbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: dbeaver
+    environment:
+      - DBEAVER_VERSION=latest
+    volumes: 
+      - dbeaver_data:/root/.local/share/DBeaverData
+    networks: 
+      - web_network
+      - db_network
+
+
+# Docker Networks
+networks:
+  db_network:
+    driver: bridge
+  web_network:
+    driver: bridge
+ 
+ # Docker Volumes
+volumes:
+  pgsql:
+  dbeaver_data:

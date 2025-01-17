@@ -1,0 +1,122 @@
+{% extends "layouts/base.html" %}
+
+<script src="/static/assets/js/custom.js"></script>
+<script src='fullcalendar/dist/index.global.js'></script>
+
+{% block title %} Charts {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Charts</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+            <li class="breadcrumb-item active">Charts</li>
+        </ol>
+    </div>
+    <div class="container">
+        <h2 class="calendar-header">Event Calendar</h2>
+        <div class="text-center mb-3">
+            <button class="btn btn-primary mr-2" id="prevMonth">Previous Month</button>
+            <button class="btn btn-primary" id="nextMonth">Next Month</button>
+        </div>
+        <table class="table calendar-table">
+            <thead>
+                <tr>
+                    <th>Sun</th>
+                    <th>Mon</th>
+                    <th>Tue</th>
+                    <th>Wed</th>
+                    <th>Thu</th>
+                    <th>Fri</th>
+                    <th>Sat</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Calendar content will be generated here -->
+            </tbody>
+        </table>
+    </div>
+    
+</main>
+
+{% endblock content %}
+
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+
+        // Define events (Date format: YYYY-MM-DD)
+        const events = [
+            '2023-09-25', // Example event date
+            // Add more event dates here
+        ];
+
+        function renderCalendar(month, year) {
+            const firstDayOfMonth = new Date(year, month, 1);
+            const lastDayOfMonth = new Date(year, month + 1, 0);
+            const daysInMonth = lastDayOfMonth.getDate();
+
+            let html = '';
+            let dayCounter = 1;
+
+            for (let i = 0; i < 6; i++) {
+                html += '<tr>';
+                for (let j = 0; j < 7; j++) {
+                    if ((i === 0 && j < firstDayOfMonth.getDay()) || dayCounter > daysInMonth) {
+                        html += '<td></td>';
+                    } else {
+                        const currentDate = new Date(year, month, dayCounter);
+                        const isEventDay = events.includes(currentDate.toISOString().split('T')[0]);
+
+                        html += `<td>${dayCounter}`;
+                        if (isEventDay) {
+                            html += `<span class="event-day">Event</span>`;
+                        }
+                        html += '</td>';
+
+                        dayCounter++;
+                    }
+                }
+                html += '</tr>';
+            }
+
+            $('tbody').html(html);
+            $('.calendar-header').text(new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' }));
+        }
+
+        function showPreviousMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar(currentMonth, currentYear);
+        }
+
+        function showNextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar(currentMonth, currentYear);
+        }
+
+        // Event listeners for navigation buttons
+        $('#prevMonth').click(showPreviousMonth);
+        $('#nextMonth').click(showNextMonth);
+
+        // Initial render
+        renderCalendar(currentMonth, currentYear);
+    </script>
+{% endblock javascripts %}
